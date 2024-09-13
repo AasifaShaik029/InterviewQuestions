@@ -1,0 +1,278 @@
+1. Infrastructure as Code (IaC) Security
+
+Terraform script to deploy a secure EC2 instance:
+Terraform
+resource "aws_instance" "example" {
+  ami           = "ami-0c55b159cbfafe1f0" # Replace with your desired AMI
+  instance_type = "t2.micro" # Replace with your desired instance type
+  key_name      = "my-key-pair" # Replace with your key pair name
+
+  tags = {
+    Name = "Secure EC2 Instance"
+  }
+
+  security_groups = ["sg-0123456789abcdef"] # Replace with your security group ID
+}
+
+resource "aws_security_group" "example" {
+  name = "Secure EC2 Security Group"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Allow SSH from anywhere for demonstration, adjust as needed
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Allow all outbound traffic for demonstration, adjust as needed
+  }
+}
+Use code with caution.
+
+CloudFormation template to deploy a secure VM:
+YAML
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Creates a secure EC2 instance with a security group"
+
+Resources:
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: "ami-0c55b159cbfafe1f0" # Replace with your desired AMI
+      InstanceType: "t2.micro" # Replace with your desired instance type
+      KeyName: "my-key-pair" # Replace with your key pair name
+      SecurityGroups:
+        - Ref: EC2SecurityGroup
+      Tags:
+        - Key: Name
+          Value: Secure EC2 Instance
+
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: Secure EC2 Security Group
+      GroupDescription: "Allows SSH access"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0 # Allow SSH from anywhere for demonstration, adjust as needed
+Use code with caution.
+
+2. Security Scanning in CI/CD Pipeline
+
+Jenkins pipeline with SonarQube integration:
+Groovy
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                sh 'sonar-scanner -Dsonar.projectKey=my-project -Dsonar.projectName=My Project -Dsonar.sources=src'
+            }
+        }
+    }
+}
+Use code with caution.
+
+Remediation steps:
+
+Review SonarQube reports for vulnerabilities.
+Prioritize vulnerabilities based on severity.
+Fix vulnerabilities in code and rebuild the application.
+Re-run SonarQube analysis to verify the fixes.
+3. Docker Container Security
+
+Dockerfile with best practices:
+Dockerfile
+FROM alpine:latest
+
+# Install necessary packages
+RUN apk add --no-cache bash curl
+
+# Set a non-root user
+RUN adduser appuser
+
+# Copy application files
+COPY . /app
+
+# Change to non-root user
+USER appuser
+
+# Set the working directory
+WORKDIR /app
+
+# Expose the application port
+EXPOSE 8080
+
+# Command to run the application
+CMD ["bash", "-c", "exec java -jar my-app.jar"]
+Use code with caution.
+
+Ensure secure container runtime:
+
+Use a trusted container runtime like Docker or containerd.
+Keep the runtime updated with the latest security patches.
+Enforce security policies using tools like SELinux or AppArmor.
+4. Automating Security with Ansible or Chef
+
+Ansible playbook to apply security configurations:
+YAML
+- name: Disable SSH root login
+  become: yes
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "^PermitRootLogin yes"
+    line: "PermitRootLogin no"
+    state: present
+
+- name: Install fail2ban
+  become: yes
+  apt:
+    name: fail2ban
+    state: present
+Use code with caution.
+
+Chef recipe to apply security configurations:
+Ruby
+execute 'disable_ssh_root_login' do
+  command 'sed -i s/^PermitRootLogin yes/PermitRootLogin no/g /etc/ssh/sshd_config'
+  only_if 'grep -q "^PermitRootLogin yes" /etc/ssh/sshd_config'
+end
+
+package 'fail2ban' do
+  action :install
+end
+Use code with caution.
+
+5. Secrets Management
+
+Integrating HashiCorp Vault into a pipeline:
+Groovy
+pipeline {
+    agent any
+    stages {
+        stage('Retrieve Secret') {
+            steps {
+                sh 'vault login -token my-vault-token'
+                sh 'vault read secret/my-secret'
+            }
+        }
+    }
+}
+Use code with caution.
+
+Rotating and revoking secrets:
+
+Use Vault's built-in rotation capabilities.
+Revoke secrets when they are no longer needed.
+Implement a policy to enforce secret rotation and revocation.
+6. Vulnerability Management
+
+Using OpenVAS for vulnerability scanning:
+Bash
+openvas-nvt-sync
+openvas-scanner --target 192.168.1.100 --profile full
+Use code with caution.
+
+Automating vulnerability scans:
+
+Schedule regular scans using cron jobs or automation tools.
+Integrate vulnerability scanning into the CI/CD pipeline.
+Analyze scan results and prioritize vulnerabilities.
+7. Monitoring and Alerting for Security Threats
+
+Configuring CloudWatch for security alerts:
+YAML
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Creates a CloudWatch alarm for failed login attempts"
+
+Resources:
+  CloudWatchAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: "FailedLoginAttempts"
+      MetricName: "FailedLoginAttempts"
+      Namespace: "AWS/EC2"
+      Statistic: "Sum"
+      Period: 60
+      EvaluationPeriods: 3
+      Threshold: 5
+      ComparisonOperator: "GreaterThanOrEqualToThreshold"
+      AlarmActions:
+        - Ref: SNSTopic
+Use code with caution.
+
+Integrating logging and monitoring tools:
+
+Collect logs from various sources (e.g., servers, applications, containers).
+Analyze logs for suspicious activity using tools like Elasticsearch and Kibana.
+Set up alerts for anomalies or security threats.
+8. Configure Role-Based Access Control (RBAC)
+
+Implementing RBAC in Kubernetes:
+YAML
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: my-clusterrole
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list"]
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name:   
+ my-clusterrolebinding
+subjects:
+  - kind: User
+    name: my-user
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: my-clusterrole
+Use code with caution.
+
+Auditing access to critical resources:
+
+Use audit logs to track user activity.
+Analyze audit logs for unauthorized access or suspicious behavior.
+Implement policies to enforce least-privilege access.
+9. Network Security Implementation
+
+Creating a security group rule:
+Terraform
+resource "aws_security_group_rule" "example" {
+  type              = "ingress"
+  protocol          = "tcp"
+  from_port        = 80
+  to_port          = 80
+  cidr_blocks      = ["10.0.0.0/8"]
+  security_group_id = aws_security_group.example.id
+}
+Use code with caution.
+
+Monitoring network traffic:
+
+Use tools like tcpdump or Wireshark to capture and analyze network traffic.
+Set up intrusion detection systems (IDS) to detect suspicious activity.
+10. Patch Management Automation
+
+Ansible playbook for patching:
+YAML
+- name: Update package lists
+  become: yes
+Use code with caution.
+
