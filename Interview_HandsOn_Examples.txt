@@ -134,3 +134,48 @@ Explanation: This is a simple Jenkins pipeline that includes build, test, and de
   az vm create --resource-group MyResourceGroup --name MyVM --image UbuntuLTS --admin-username azureuser --generate-ssh-keys
 
 Explanation: These commands create a resource group and a virtual machine in Azure.
+
+
+ Docker commands:
+-----------------
+
+Pull an image from Docker Hub:
+
+docker pull <image_name>
+Example: docker pull nginx
+
+List all Docker images:
+
+docker images
+Run a Docker container:
+
+docker run -d --name <container_name> <image_name>
+Example: docker run -d --name mynginx nginx
+
+List running containers:
+
+
+docker ps
+Stop a running container:
+
+
+docker stop <container_id_or_name>
+Remove a Docker container:
+
+docker rm <container_id_or_name>
+Remove a Docker image:
+
+docker rmi <image_id_or_name>
+Build an image from a Dockerfile:
+
+
+docker build -t <image_name> .
+View container logs:
+
+
+docker logs <container_id_or_name>
+Execute a command in a running container:
+
+
+docker exec -it <container_id_or_name> <command>
+Example: docker exec -it mynginx /bin/bash
